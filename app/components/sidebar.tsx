@@ -34,17 +34,17 @@ const Sidebar = () => {
       <div className="w-40 " hidden={!showsidebar}>
         <ul className="px-5 py-3 flex flex-col space-y-2 *:hover:bg-sky-100 *:hover:cursor-pointer *:p-1 *:rounded-lg">
           {links.map(({ label, href }) => (
-            <li
+            <a
               key={href}
+              href={href}
               className={`${pathname === href ? "bg-sky-100" : ""}`}
             >
-              <button
-                onClick={() => router.push(href)}
-                className="w-full text-left cursor-pointer"
-              >
-                {label}
-              </button>
-            </li>
+              <li>
+                <button className="w-full text-left cursor-pointer">
+                  {label}
+                </button>
+              </li>
+            </a>
           ))}
         </ul>
       </div>
