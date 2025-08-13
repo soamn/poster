@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -23,6 +24,8 @@ export async function GET(
         message: "user Not Found",
       });
     }
+        revalidatePath("/admin/users");
+    
     return NextResponse.json({
       status: 200,
       success: true,

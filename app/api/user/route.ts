@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -42,6 +43,8 @@ export async function POST(req: NextRequest) {
         roleId: Number(roleId),
       },
     });
+    revalidatePath("/admin/users");
+
     return NextResponse.json({
       status: 201,
       success: true,
@@ -117,6 +120,8 @@ export async function PUT(req: NextRequest) {
         data: { password: newpassword },
       });
     }
+    revalidatePath("/admin/users");
+
     return NextResponse.json({
       status: 201,
       success: true,
@@ -174,7 +179,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.user.delete({
       where: { id },
     });
-
+    revalidatePath("/admin/users");
     return NextResponse.json({
       status: 201,
       success: true,

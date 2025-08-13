@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
@@ -23,6 +24,8 @@ export async function POST(req: NextRequest) {
         name,
       },
     });
+    revalidatePath("/admin/categories");
+
     return NextResponse.json({
       status: 200,
       message: `${category.name} created successfully`,
@@ -48,6 +51,7 @@ export async function PUT(req: NextRequest) {
         name: name,
       },
     });
+    revalidatePath("/admin/categories");
 
     return NextResponse.json({
       status: 200,
@@ -72,6 +76,7 @@ export async function DELETE(req: NextRequest) {
         id,
       },
     });
+    revalidatePath("/admin/categories");
 
     return NextResponse.json({
       status: 200,

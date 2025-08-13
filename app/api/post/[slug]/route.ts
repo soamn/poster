@@ -168,6 +168,7 @@ export async function PUT(
         thumbnail: thumbnailPath,
       },
     });
+    revalidatePath("/admin/posts");
 
     return NextResponse.json({
       status: 200,
@@ -230,7 +231,7 @@ export async function DELETE(
     });
 
     revalidatePath("/");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin/posts");
 
     return NextResponse.json({
       status: 200,
