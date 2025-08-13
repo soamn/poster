@@ -45,7 +45,7 @@ function Editor({ html, isUpdate }: { html: string; isUpdate: boolean }) {
   };
 
   return (
-    <LexicalComposer initialConfig={initialConfig} cla>
+    <LexicalComposer initialConfig={initialConfig}>
       <div className="relative mr-8 ">
         <RichTextPlugin
           contentEditable={
