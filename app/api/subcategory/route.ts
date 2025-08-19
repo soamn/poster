@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
       },
       include: { Category: true },
     });
+    revalidatePath("/admin/categories");
+    RevalidateSite(subcategory.Category, "category");
 
     return NextResponse.json({
       status: 200,
@@ -45,7 +47,7 @@ export async function PUT(req: NextRequest) {
     });
     revalidatePath("/admin/categories");
     RevalidateSite(subcategory.Category, "category");
-    
+
     return NextResponse.json({
       status: 200,
       message: `Updated to ${subcategory.name}  successfully `,
