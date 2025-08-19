@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         sites,
       },
     });
+    revalidatePath("/admin/categories");
 
     return NextResponse.json({
       status: 200,

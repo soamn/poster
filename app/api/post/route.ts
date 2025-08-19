@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { r2 } from "@/lib/r2";
 import { auth } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -100,7 +101,9 @@ export async function POST(req: NextRequest) {
       },
       include: { category: true },
     });
-
+    revalidatePath("/");
+    revalidatePath("/admin/posts");
+    
     return NextResponse.json({
       status: 200,
       success: true,
