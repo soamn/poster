@@ -4,7 +4,6 @@ import sharp from "sharp";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { r2 } from "@/lib/r2";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -19,7 +18,7 @@ export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
 
   if (
-    (session?.user.role?.id as number) !== 1 ||
+    (session?.user.role?.id as number) !== 1 &&
     (session?.user?.role?.id as number) !== 2
   ) {
     return NextResponse.json({
@@ -60,7 +59,14 @@ export async function POST(req: NextRequest) {
       await r2.send(command);
       thumbnailPath = `${process.env.R2_PUBLIC_URL}/${fileName}`;
     }
-    const author = await prisma.user.findFirst();
+    const author = await prisma.user.findFirst({
+      where: {
+        id: session?.user.id,
+      },
+      select: {
+        id: true,
+      },
+    });
     if (!author) {
       return NextResponse.json({
         status: 200,
@@ -92,8 +98,8 @@ export async function POST(req: NextRequest) {
           },
         },
       },
+      include: { category: true },
     });
-    revalidatePath("/admin/posts");
 
     return NextResponse.json({
       status: 200,

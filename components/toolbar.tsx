@@ -79,10 +79,9 @@ export function Toolbar() {
       });
     });
   }, [editor]);
-
   return (
     <>
-      <div className="absolute left-5 top-2 flex gap-2 mb-2 px-2">
+      <div className="flex space-x-2 px-4   p-2 ">
         <button
           className={`px-3 py-1 rounded cursor-pointer ${
             isBold ? "bg-black text-white" : "bg-zinc-200 hover:bg-gray-300"
@@ -195,8 +194,9 @@ export function Toolbar() {
           selectedElementKey={selectedElementKey}
           codeLanguage={codeLanguage}
         />
+
         <div
-          className="absolute top-10 left-70 bg-zinc-200 shadow p-2 rounded-2xl flex"
+          className="absolute left-0 top-15 z-50  bg-white    shadow p-2 rounded-2xl flex"
           hidden={!showUrl}
         >
           <input
@@ -205,14 +205,14 @@ export function Toolbar() {
             }}
             type="text"
             placeholder="https://example.com"
-            className="border rounded-lg p-2 h-full outline-0 bg-white"
+            className="w-20 border text-sm rounded-lg p-2 z-50 h-full outline-0 bg-white"
           />
           <button
             onClick={() => {
               setShowUrl(false);
               editor.dispatchCommand(TOGGLE_LINK_COMMAND, linkUrl);
             }}
-            className="bg-zinc-800 p-2 rounded-lg text-white ml-2 cursor-pointer"
+            className="bg-zinc-800 text-xs p-1 rounded-lg text-white ml-2 cursor-pointer"
           >
             Done/Exit
           </button>

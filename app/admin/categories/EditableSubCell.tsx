@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Subcategory } from "@/app/generated/prisma";
 import { Trash } from "lucide-react";
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 
 type EditableSubCellProps = {
   value: Subcategory;

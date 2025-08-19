@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
+  }
   const cookie = getSessionCookie(request);
   if (!cookie) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -11,5 +15,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/:path*"],
 };

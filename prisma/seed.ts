@@ -30,7 +30,7 @@ export async function main() {
     },
   });
 
-  console.log("✅ Seeded user admin@example.com / password123");
+  console.log("✅ Seeded successfully");
 }
 
 main()

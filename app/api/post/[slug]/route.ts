@@ -5,6 +5,7 @@ import { r2 } from "@/lib/r2";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { auth } from "@/lib/auth";
+import { RevalidateSite } from "@/lib/revalidator";
 
 export async function GET(
   req: NextRequest,
@@ -42,46 +43,7 @@ export async function GET(
     });
   }
 }
-// export async function PATCH(
-//   req: NextRequest,
-//   context: { params: Promise<{ slug: string }> }
-// ) {
-//   const { params } = context;
-//   const slug = (await params).slug;
-//   try {
-//     const likedPost = await prisma.post.findFirst({
-//       where: {
-//         slug,
-//       },
-//       select: {
-//         Likes: true,
-//       },
-//     });
-//     let likes = likedPost?.Likes;
-//     if (!likes) {
-//       likes = 0;
-//     }
-//     likes++;
-//     const updatedPost = await prisma.post.update({
-//       where: { slug },
-//       data: { Likes: likes },
-//       select: { Likes: true, slug: true },
-//     });
-//     revalidatePath("/");
-//     revalidatePath("/admin/dashboard");
-//     return NextResponse.json({
-//       success: true,
-//       status: 200,
-//       message: updatedPost,
-//     });
-//   } catch (error) {
-//     return NextResponse.json({
-//       status: 500,
-//       success: false,
-//       message: "Failed to complete the request",
-//     });
-//   }
-// }
+
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ slug: string }> }
@@ -103,7 +65,7 @@ export async function PUT(
   try {
     const session = await auth.api.getSession({ headers: req.headers });
     if (
-      (session?.user.role?.id as number) !== 1 ||
+      (session?.user.role?.id as number) !== 1 &&
       (session?.user?.role?.id as number) !== 2
     ) {
       return NextResponse.json({
@@ -150,7 +112,7 @@ export async function PUT(
     }
 
     const updatedPost = await prisma.post.update({
-      where: { id: parseInt(id) },
+      where: { id: Number(id) },
       data: {
         title,
         description,
@@ -167,8 +129,10 @@ export async function PUT(
         featured: featured === "1",
         thumbnail: thumbnailPath,
       },
+      include: { category: true },
     });
     revalidatePath("/admin/posts");
+    RevalidateSite(updatedPost.category, `post-${updatedPost.slug}`);
 
     return NextResponse.json({
       status: 200,
@@ -176,7 +140,6 @@ export async function PUT(
       message: "Post updated successfully",
     });
   } catch (error) {
-    console.error(error);
     return NextResponse.json({
       status: 500,
       success: false,
@@ -200,8 +163,16 @@ export async function DELETE(
     }
     const { params } = context;
     const id = (await params).slug;
+    const postId = Number(id);
+    if (isNaN(postId)) {
+      return NextResponse.json({
+        status: 400,
+        success: false,
+        message: "Invalid request",
+      });
+    }
     const post = await prisma.post.findUnique({
-      where: { id: Number(id) },
+      where: { id: postId },
     });
 
     if (!post) {
@@ -226,20 +197,28 @@ export async function DELETE(
       }
     }
 
-    await prisma.post.delete({
+    const deletedPost = await prisma.post.delete({
       where: { id: post.id },
+      include: { category: true },
     });
 
     revalidatePath("/");
     revalidatePath("/admin/posts");
+    RevalidateSite(deletedPost.category, `post-${deletedPost.slug}`);
 
     return NextResponse.json({
       status: 200,
       success: true,
       message: "Post deleted successfully",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    if (error.code === "P2003") {
+      return NextResponse.json({
+        status: 400,
+        success: false,
+        message: "Cannot delete post: It is related to other records.",
+      });
+    }
     return NextResponse.json({
       status: 500,
       success: false,

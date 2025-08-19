@@ -11,10 +11,10 @@ const page = async () => {
   });
   return (
     <>
-      <CategoryTable categories={categories} />
       <div className="  flex flex-col items-center  ">
         <AddCategory />
       </div>
+      <CategoryTable categories={categories} />
     </>
   );
 };

@@ -1,4 +1,5 @@
 "use client";
+
 import { motion } from "motion/react";
 import React, { useState } from "react";
 import {
@@ -9,20 +10,30 @@ import {
 } from "@tanstack/react-table";
 import EditableCell from "./EditableCell";
 import { EditableSubCell } from "./EditableSubCell";
-import { Subcategory } from "@/app/generated/prisma";
+import { Category, Subcategory } from "@/app/generated/prisma";
 import AddSubCategory from "./AddSubCat";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useNotification } from "@/app/components/notification";
+import { ChevronDown, ChevronUp, PlusCircleIcon, Trash2 } from "lucide-react";
+import { useNotification } from "@/components/notification";
+import { JsonValue } from "@prisma/client/runtime/library";
+import { useRouter } from "next/navigation";
 
-type Category = {
-  id: number;
-  name: string;
+type CategoryWithData = Category & {
   subcategories: Subcategory[];
 };
 
-const CategoryTable = ({ categories }: { categories: Category[] }) => {
-  const [data, setData] = useState<Category[]>(categories);
+const CategoryTable = ({ categories }: { categories: CategoryWithData[] }) => {
+  const [data, setData] = useState<CategoryWithData[]>(categories);
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const [sitesState, setSitesState] = useState<Record<number, JsonValue[]>>(
+    () =>
+      categories.reduce((acc, cat) => {
+        acc[cat.id] = Array.isArray(cat.sites) ? [...cat.sites] : [];
+        return acc;
+      }, {} as Record<number, JsonValue[]>)
+  );
+
+  const [siteInputs, setSiteInputs] = useState<Record<number, string>>({});
+
   const { showNotification } = useNotification();
 
   const toggleRow = (rowIndex: number) => {
@@ -32,7 +43,42 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
     }));
   };
 
-  const columns: ColumnDef<Category>[] = [
+  const updateSites = async (categoryId: number, newSites: JsonValue[]) => {
+    try {
+      const response = await fetch(`/api/category/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: categoryId, sites: newSites }),
+      });
+      const result = await response.json();
+
+      showNotification(
+        result.message,
+        result.success ? "success" : "error",
+        1000
+      );
+    } catch (err) {
+      showNotification("Failed to update sites", "error", 1000);
+    }
+  };
+
+  const handleAddSite = (catId: number) => {
+    const newSite = siteInputs[catId]?.trim();
+    if (!newSite) return;
+
+    const newSites = [...(sitesState[catId] || []), newSite];
+    setSitesState((prev) => ({ ...prev, [catId]: newSites }));
+    setSiteInputs((prev) => ({ ...prev, [catId]: "" }));
+    updateSites(catId, newSites);
+  };
+
+  const handleRemoveSite = (catId: number, index: number) => {
+    const newSites = sitesState[catId].filter((_, i) => i !== index);
+    setSitesState((prev) => ({ ...prev, [catId]: newSites }));
+    updateSites(catId, newSites);
+  };
+
+  const columns: ColumnDef<CategoryWithData>[] = [
     {
       accessorKey: "name",
       header: "Category Name",
@@ -41,15 +87,15 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
         const isExpanded = expandedRows[rowIndex];
 
         return (
-          <div className="flex  items-center justify-between  ">
+          <div className="flex items-center justify-between">
             <EditableCell
-              getValue={props.getValue}
+              getValue={props.getValue as () => string}
               row={props.row}
               column={props.column}
               table={props.table}
             />
             <div
-              className=" text-gray-500 w-10  cursor-pointer flex  justify-center"
+              className="text-gray-500 w-10 cursor-pointer flex justify-center"
               onClick={() => toggleRow(rowIndex)}
             >
               {isExpanded ? <ChevronUp /> : <ChevronDown />}
@@ -67,32 +113,24 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
     columnResizeMode: "onChange",
     meta: {
       updateData: async (rowIndex: number, columnId: string, value: string) => {
-        // Clone and update the data
         const updatedRow = { ...data[rowIndex], [columnId]: value };
         const newData = data.map((row, index) =>
           index === rowIndex ? updatedRow : row
         );
-
-        // Update the state first
         setData(newData);
 
-        // Now safely use the updated row
-        const itemId = updatedRow.id;
-
-        // Optional: Send to backend
         try {
           const response = await fetch(`/api/category`, {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: value,
-              id: itemId,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: value, id: updatedRow.id }),
           });
           const result = await response.json();
-          showNotification(result.message, "success", 1000);
+          showNotification(
+            result.message,
+            result.success ? "success" : "error",
+            1000
+          );
         } catch (error) {
           console.error("Failed to update category:", error);
         }
@@ -100,15 +138,14 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
     },
   });
 
-  // console.log(data);
   return (
-    <div className="p-6 w-full ">
-      <div className="rounded-4xl p-2 bg-gradient-to-r from-cyan-100 to-amber-100 bg-oacity-60 border-gray-300 ">
-        <div className="rounded-4xl bg-white/60 min-h-150   ">
+    <div className="p-6 w-full">
+      <div className="rounded-4xl p-2 bg-gradient-to-r from-cyan-100 to-amber-100 border-gray-300">
+        <div className="rounded-4xl bg-white/60 min-h-150">
           {/* Header */}
           {table.getHeaderGroups().map((headerGroup) => (
             <div
-              className="flex   border-b  border-gray-300 text-gray-800 font-semibold px-4 py-3"
+              className="flex border-b border-gray-300 text-gray-800 font-semibold px-4 py-3"
               key={headerGroup.id}
             >
               {headerGroup.headers.map((header) => (
@@ -130,7 +167,7 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
             return (
               <React.Fragment key={row.id}>
                 {/* Category row */}
-                <div className="flex items-center px-4 py-3  ">
+                <div className="flex items-center px-4 py-3">
                   {row.getVisibleCells().map((cell) => (
                     <div className="w-full" key={cell.id}>
                       {flexRender(
@@ -141,21 +178,66 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
                   ))}
                 </div>
 
-                {/* Subcategories */}
+                {/* Expanded content */}
                 {isExpanded && (
                   <motion.div
                     initial={{ scaleY: 0 }}
-                    animate={{
-                      scaleY: 1,
-                    }}
-                    className=" px-6 py-2  text-sm text-gray-700 "
+                    animate={{ scaleY: 1 }}
+                    className="px-6 py-2 text-sm text-gray-700"
                   >
-                    <ul className="  space-y-1">
+                    {/* Sites */}
+                    <div className="py-1">
+                      <label className="text-sm font-medium">Sites</label>
+                      {sitesState[category.id]?.length > 0 && (
+                        <ul className="flex flex-wrap gap-2 mt-2">
+                          {sitesState[category.id].map((s, i) => (
+                            <li
+                              key={i}
+                              className="flex items-center bg-gray-100 px-2 text-xs py-1 rounded"
+                            >
+                              {s?.toString()}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSite(category.id, i)}
+                                className="ml-2"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="flex gap-2 mt-1">
+                        <input
+                          value={siteInputs[category.id] || ""}
+                          onChange={(e) =>
+                            setSiteInputs((prev) => ({
+                              ...prev,
+                              [category.id]: e.target.value,
+                            }))
+                          }
+                          type="text"
+                          className="p-2 w-1/6 outline-none"
+                          placeholder="Enter site (e.g. site.com)"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddSite(category.id)}
+                          className="cursor-pointer"
+                        >
+                          <PlusCircleIcon size={18} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Subcategories */}
+                    <b>Subcategories</b>
+                    <ul className="space-y-1">
                       {category.subcategories.map((s, k) => (
                         <li key={k} className="ml-2">
                           <EditableSubCell
                             value={{
-                              name: s.name as string,
+                              name: s.name ?? "",
                               id: s.id,
                               categoryId: s.categoryId,
                             }}
@@ -185,10 +267,7 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
                                     headers: {
                                       "Content-Type": "application/json",
                                     },
-                                    body: JSON.stringify({
-                                      name: name,
-                                      id: id,
-                                    }),
+                                    body: JSON.stringify({ name, id }),
                                   }
                                 );
                                 const result = await response.json();
@@ -197,14 +276,12 @@ const CategoryTable = ({ categories }: { categories: Category[] }) => {
                                   "success",
                                   1000
                                 );
-                              } catch (err) {
-                                console.error("Subcategory update failed", err);
-                              }
+                              } catch (err) {}
                             }}
                           />
                         </li>
                       ))}
-                      <li className="flex w-full justify-center ">
+                      <li className="flex w-full justify-center">
                         <AddSubCategory categoryId={category.id} />
                       </li>
                     </ul>

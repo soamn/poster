@@ -1,16 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -20,14 +14,15 @@ model User {
   name          String?
   password      String?
   roleId        Int
-  role          Role      @relation(fields: [roleId], references: [id])
-  posts         Post[]
   image         String?
   createdAt     DateTime
   emailVerified Boolean
   updatedAt     DateTime
-  sessions      Session[]
+  about         String?
+  posts         Post[]
   accounts      Account[]
+  sessions      Session[]
+  role          Role      @relation(fields: [roleId], references: [id])
 
   @@map("user")
 }
@@ -46,38 +41,39 @@ model Post {
   slug          String      @unique
   featured      Boolean     @default(false)
   published     Boolean     @default(true)
-  author        User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId      String
   tags          String
   thumbnail     String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now()) @updatedAt
   categoryId    Int
-  category      Category    @relation(fields: [categoryId], references: [id])
   subcategoryId Int
-  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
   Likes         Int?
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
+  category      Category    @relation(fields: [categoryId], references: [id])
+  author        User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
 model Category {
   id            Int           @id @default(autoincrement())
-  name          String
-  subcategories Subcategory[]
+  name          String        @unique
+  sites         Json?
   Post          Post[]
+  subcategories Subcategory[]
 }
 
 model Subcategory {
   id         Int      @id @default(autoincrement())
   name       String
-  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int
   Post       Post[]
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -85,7 +81,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
@@ -94,7 +89,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -104,6 +98,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }

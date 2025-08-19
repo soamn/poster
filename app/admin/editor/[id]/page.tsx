@@ -1,4 +1,4 @@
-import Editor from "@/app/components/editor";
+import Editor from "@/components/editor";
 import prisma from "@/lib/prisma";
 import React from "react";
 import { notFound } from "next/navigation";

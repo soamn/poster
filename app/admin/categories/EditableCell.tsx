@@ -1,7 +1,7 @@
 "use client";
 import { Trash } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 
 const EditableCell = ({ getValue, row, column, table }: any) => {
   const initalValue = getValue();

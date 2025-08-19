@@ -1,7 +1,7 @@
 "use client";
 import { Delete, X } from "lucide-react";
 import React, { useState } from "react";
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 type Props = {
   categoryId: number;
 };

@@ -31,24 +31,23 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-zinc-100 p-3 rounded m-5 flex justify-between items-center shadow">
-      <div className="text-lg font-semibold">{user?.name}</div>
-
+    <header className="bg-zinc-100 p-1 w md:p-3 rounded md:m-5 m-2 flex justify-between items-center shadow ">
+      <div className="md:text-lg text-xs md:font-semibold">{user?.name}</div>
       {user && (
-        <div className="relative" ref={menuRef}>
+        <div className="relative " ref={menuRef}>
           <button
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex items-center gap-2 focus:outline-none"
+            className="flex items-center gap-2 focus:outline-none "
           >
             <img
               src={user.image || "https://placehold.co/400"}
               alt={user.name || "User"}
-              className="w-10 h-10 rounded-full border border-gray-300"
+              className="w-10 h-10 rounded-full text-xs border border-gray-300 "
             />
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div className=" absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
               <button
                 onClick={() => router.push(`/admin/users/${user.id}`)}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"

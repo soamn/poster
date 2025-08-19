@@ -1,9 +1,9 @@
 "use client";
 
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useUserProvider } from "@/app/components/userprovider";
+import { useUserProvider } from "@/components/userprovider";
 
 const UpdateUser = () => {
   const params = useParams();
@@ -19,6 +19,7 @@ const UpdateUser = () => {
     roleId: "",
     oldpassword: "",
     image: "",
+    about: "",
   });
   const { showNotification } = useNotification();
 
@@ -48,6 +49,7 @@ const UpdateUser = () => {
             password: "",
             roleId: data.message.user.roleId || "",
             image: data.message.user.image || "",
+            about: data.message.user.about || "",
             oldpassword: "",
           });
         }
@@ -63,7 +65,9 @@ const UpdateUser = () => {
   }, [userId]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -71,13 +75,13 @@ const UpdateUser = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !formData.email ||
-      !formData.name ||
-      !formData.roleId ||
-      !formData.oldpassword
-    ) {
-      showNotification("All fields are required", "warning", 1500);
+    if (!formData.email || !formData.name || !formData.roleId) {
+      showNotification(
+        `Required *email *name *oldpassword
+        `,
+        "warning",
+        1500
+      );
       return;
     }
     try {
@@ -252,7 +256,27 @@ const UpdateUser = () => {
               </div>
             </div>
           </div>
-
+          <div className="col-span-full">
+            <label
+              htmlFor="about"
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              About
+            </label>
+            <div className="mt-2">
+              <textarea
+                id="about"
+                name="about"
+                onChange={handleChange}
+                rows={3}
+                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                defaultValue={formData.about}
+              />
+            </div>
+            <p className="mt-3 text-sm/6 text-gray-600">
+              Write a few sentences about yourself.
+            </p>
+          </div>
           {/* Submit */}
           <div className="mt-6 flex items-center justify-end gap-x-6">
             <button

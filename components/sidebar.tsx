@@ -2,14 +2,12 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useUserProvider } from "./userprovider";
-import { label } from "motion/react-client";
 
 const Sidebar = () => {
   const [showsidebar, setShowSidebar] = useState(true);
   const pathname = usePathname();
-  const router = useRouter();
   const { getUserdata } = useUserProvider();
   const data = getUserdata();
 
@@ -17,8 +15,8 @@ const Sidebar = () => {
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "Posts", href: "/admin/posts" },
     { label: "Users", href: "/admin/users" },
-    { label: "Create ", href: "/admin/editor" },
     { label: "Categories", href: "/admin/categories" },
+    { label: "Create Post", href: "/admin/editor" },
     ...(data.role === 1
       ? [
           {
@@ -30,8 +28,12 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen relative w-fit  p-2  rounded-lg bg-zinc-100">
-      <div className="w-40 " hidden={!showsidebar}>
+    <div
+      className={`lg:h-screen  ${
+        showsidebar && "h-screen"
+      } absolute   lg:relative   p-4  rounded-lg bg-zinc-100 z-50`}
+    >
+      <div className="w-fit" hidden={!showsidebar}>
         <ul className="px-5 py-3 flex flex-col space-y-2 *:hover:bg-sky-100 *:hover:cursor-pointer *:p-1 *:rounded-lg">
           {links.map(({ label, href }) => (
             <a
@@ -50,7 +52,7 @@ const Sidebar = () => {
       </div>
       <button
         onClick={() => setShowSidebar(!showsidebar)}
-        className="cursor-pointer absolute top-2 right-0"
+        className="cursor-pointer absolute top-2   right-0"
       >
         {showsidebar ? <ChevronLeft /> : <ChevronRight />}
       </button>

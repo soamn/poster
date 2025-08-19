@@ -71,8 +71,12 @@ const SavePlugin = () => {
         });
         const response = await res.json();
         setLoading(false);
-        showNotification(response.message, "success", 1500);
-        router.push(`/admin/editor/${response.post}`);
+        if (response.success) {
+          showNotification(response.message, "success", 1500);
+          router.push(`/admin/editor/${response.post}`);
+        } else {
+          showNotification(response.message, "warning", 1500);
+        }
       } catch (error) {
         showNotification("Failed to complete request", "error", 1000);
         setLoading(false);
@@ -82,7 +86,7 @@ const SavePlugin = () => {
 
   return (
     <div className="relative rounded-4xl p-5  bg-white  ">
-      <div className="w-full grid grid-cols-2 place-items-center gap-4">
+      <div className="w-full grid lg:grid-cols-2 place-items-center gap-4">
         <div>
           <label htmlFor="title" className="block font-bold">
             Enter Meta Title?

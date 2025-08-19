@@ -2,7 +2,7 @@
 
 import { signIn } from "@/lib/auth-client";
 import { useState } from "react";
-import { useNotification } from "../components/notification";
+import { useNotification } from "../../components/notification";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {

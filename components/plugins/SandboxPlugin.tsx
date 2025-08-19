@@ -1,7 +1,7 @@
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {  useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Code2 } from "lucide-react";
 import { $createHtmlPreviewNode } from "../nodes/HtmlPreviewNode";
 import { $insertNodes } from "lexical";
@@ -33,7 +33,7 @@ const HtmlPreviewPlugin = () => {
   };
 
   return (
-    <div className="relative">
+    <div>
       <button
         className="px-3 py-1 rounded cursor-pointer hover:bg-gray-300"
         onClick={() => setIsOpen(!isOpen)}
@@ -42,7 +42,7 @@ const HtmlPreviewPlugin = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 bg-white p-6 rounded-lg shadow text-black flex flex-col gap-4 w-[300px]">
+        <div className=" left-0 absolute z-50 bg-white p-6 rounded-lg shadow text-black flex flex-col gap-4 w-full">
           <textarea
             className="border p-2 rounded"
             placeholder="HTML"

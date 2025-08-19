@@ -1,5 +1,5 @@
 import React from "react";
-import Editor from "@/app/components/editor";
+import Editor from "@/components/editor";
 
 const page = () => {
   const html = "";

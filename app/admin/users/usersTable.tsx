@@ -3,10 +3,10 @@ import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Role, User } from "@/app/generated/prisma";
 
-import BasicTable from "@/app/components/basictable";
+import BasicTable from "@/components/basictable";
 import { Pencil, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 
 type UserWithData = User & {
   role: Role;
@@ -51,7 +51,7 @@ const UserTable = ({ users }: Props) => {
           <img
             className="w-5 h-5 object-cover rounded-full"
             src={`${
-              row.original.image ? row.original.image : "/opengraph.jpg"
+              row.original.image ? row.original.image : "/opengraph-image.jpg"
             }`}
             alt=""
           />

@@ -1,4 +1,6 @@
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { RevalidateSite } from "@/lib/revalidator";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,14 +19,27 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name } = body;
+  const { name, sites } = body;
+
   try {
-    const category = await prisma.category.create({
-      data: {
-        name,
+    const existingCategory = await prisma.category.findFirst({
+      where: {
+        name: name,
       },
     });
-    revalidatePath("/admin/categories");
+    if (existingCategory) {
+      return NextResponse.json({
+        status: 400,
+        message: `${existingCategory.name} Category already exists`,
+        success: false,
+      });
+    }
+    const category = await prisma.category.create({
+      data: {
+        name: name,
+        sites,
+      },
+    });
 
     return NextResponse.json({
       status: 200,
@@ -32,6 +47,7 @@ export async function POST(req: NextRequest) {
       success: true,
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({
       status: 500,
       success: false,
@@ -39,10 +55,32 @@ export async function POST(req: NextRequest) {
     });
   }
 }
+
 export async function PUT(req: NextRequest) {
   const body = await req.json();
   const { name, id } = body;
   try {
+    const existingCategory = await prisma.category.findFirst({
+      where: {
+        name: name,
+      },
+    });
+    if (existingCategory) {
+      return NextResponse.json({
+        status: 400,
+        message: `${existingCategory.name} Category already exists`,
+        success: false,
+      });
+    }
+    const session = await auth.api.getSession({ headers: req.headers });
+    if ((session?.user.role?.id as number) !== 1) {
+      return NextResponse.json({
+        status: 401,
+        success: false,
+        message: "Access denied",
+      });
+    }
+
     const category = await prisma.category.update({
       where: {
         id,
@@ -52,7 +90,6 @@ export async function PUT(req: NextRequest) {
       },
     });
     revalidatePath("/admin/categories");
-
     return NextResponse.json({
       status: 200,
       message: `Updated to ${category.name}  successfully`,
@@ -66,18 +103,62 @@ export async function PUT(req: NextRequest) {
     });
   }
 }
+export async function PATCH(req: NextRequest) {
+  const body = await req.json();
+  const { id, sites } = body;
+  try {
+    const session = await auth.api.getSession({ headers: req.headers });
+    if ((session?.user.role?.id as number) !== 1) {
+      return NextResponse.json({
+        status: 401,
+        success: false,
+        message: "Access denied",
+      });
+    }
 
+    const category = await prisma.category.update({
+      where: {
+        id,
+      },
+      data: {
+        sites,
+      },
+    });
+    revalidatePath("/admin/categories");
+    RevalidateSite(category, "category");
+
+    return NextResponse.json({
+      status: 200,
+      message: `Updated sites in ${category.name}  successfully`,
+      success: true,
+    });
+  } catch (error) {
+    return NextResponse.json({
+      status: 500,
+      success: false,
+      message: "Error",
+    });
+  }
+}
 export async function DELETE(req: NextRequest) {
   const body = await req.json();
   const { id } = body;
   try {
+    const session = await auth.api.getSession({ headers: req.headers });
+    if ((session?.user.role?.id as number) !== 1) {
+      return NextResponse.json({
+        status: 401,
+        success: false,
+        message: "Access denied",
+      });
+    }
     const category = await prisma.category.delete({
       where: {
         id,
       },
     });
     revalidatePath("/admin/categories");
-
+    RevalidateSite(category, "category");
     return NextResponse.json({
       status: 200,
       message: `${category.name} deleted successfully`,

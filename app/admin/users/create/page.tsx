@@ -1,6 +1,6 @@
 "use client";
 
-import { useNotification } from "@/app/components/notification";
+import { useNotification } from "@/components/notification";
 // import { Role } from "@/app/generated/prisma";
 import React, { useEffect, useState } from "react";
 

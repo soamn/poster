@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { NotificationProvider } from "./components/notification";
-import Sidebar from "./components/sidebar";
+import { NotificationProvider } from "../components/notification";
+import Sidebar from "../components/sidebar";
 
 export const metadata: Metadata = {
   title: "Poster",

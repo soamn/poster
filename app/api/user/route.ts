@@ -1,5 +1,7 @@
+import UpdateUser from "@/app/admin/users/[id]/page";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { RevalidateSite } from "@/lib/revalidator";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
@@ -62,8 +64,8 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, name, email, password, roleId, oldpassword } = body;
-    if (!id || !name || !email || !roleId || !oldpassword) {
+    const { id, name, email, password, roleId, oldpassword, about } = body;
+    if (!id || !name || !email || !roleId || !about) {
       return NextResponse.json({
         status: 400,
         success: false,
@@ -93,26 +95,42 @@ export async function PUT(req: NextRequest) {
         message: "Access Denied",
       });
     }
-    const verified = await verifyPassword({
-      hash: account?.password as string,
-      password: oldpassword,
-    });
-    if (!verified) {
+    if (session?.user?.role?.id !== 1 && !oldpassword) {
       return NextResponse.json({
         status: 400,
         success: false,
-        message: "Password Incorrect",
+        message: "Old password is required",
       });
     }
-    await prisma.user.update({
+    if (session?.user?.role?.id !== 1) {
+      const verified = await verifyPassword({
+        hash: account?.password as string,
+        password: oldpassword,
+      });
+
+      if (!verified) {
+        return NextResponse.json({
+          status: 400,
+          success: false,
+          message: "Password Incorrect",
+        });
+      }
+    }
+    const updatedUser = await prisma.user.update({
       where: { id },
       data: {
         name,
         email,
         roleId: Number(roleId),
+        about,
+      },
+      include: {
+        posts: {
+          include: { category: true },
+          take: 1,
+        },
       },
     });
-
     if (account && password) {
       const newpassword = await hashPassword(password);
       await prisma.account.update({
@@ -121,7 +139,9 @@ export async function PUT(req: NextRequest) {
       });
     }
     revalidatePath("/admin/users");
-
+    if (updatedUser.posts.length > 0) {
+      RevalidateSite(updatedUser.posts[0].category, "user");
+    }
     return NextResponse.json({
       status: 201,
       success: true,
@@ -176,16 +196,32 @@ export async function DELETE(req: NextRequest) {
         });
       }
     }
-    await prisma.user.delete({
+    const deletedUser = await prisma.user.delete({
       where: { id },
+      include: {
+        posts: {
+          include: { category: true },
+          take: 1,
+        },
+      },
     });
     revalidatePath("/admin/users");
+    if (deletedUser.posts.length > 0) {
+      RevalidateSite(deletedUser.posts[0].category, "user");
+    }
     return NextResponse.json({
       status: 201,
       success: true,
       message: "User Deleted Successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "P2003") {
+      return NextResponse.json({
+        status: 400,
+        success: false,
+        message: "Cannot delete User: It is related to other records.",
+      });
+    }
     return NextResponse.json({
       status: 500,
       success: false,

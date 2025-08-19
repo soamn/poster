@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
+import { RevalidateSite } from "@/lib/revalidator";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,8 +12,8 @@ export async function POST(req: NextRequest) {
         name: name,
         categoryId: categoryId,
       },
+      include: { Category: true },
     });
-    revalidatePath("/admin/categories");
 
     return NextResponse.json({
       status: 200,
@@ -41,9 +41,11 @@ export async function PUT(req: NextRequest) {
       data: {
         name: name,
       },
+      include: { Category: true },
     });
     revalidatePath("/admin/categories");
-
+    RevalidateSite(subcategory.Category, "category");
+    
     return NextResponse.json({
       status: 200,
       message: `Updated to ${subcategory.name}  successfully `,
@@ -66,8 +68,10 @@ export async function DELETE(req: NextRequest) {
   try {
     const subcategory = await prisma.subcategory.delete({
       where: { id },
+      include: { Category: true },
     });
     revalidatePath("/admin/categories");
+    RevalidateSite(subcategory.Category, "category");
 
     return NextResponse.json({
       status: 200,

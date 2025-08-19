@@ -41,7 +41,7 @@ const ImagePlugin = () => {
         {!isOpen ? <Image /> : <ChevronDown />}
       </button>
       {isOpen && (
-        <div className="absolute  rounded-lg shadow text-black bg-white p-6 flex gap-4  flex-col">
+        <div className="absolute left-0 top-12 z-50  rounded-lg shadow text-black bg-white p-6 flex gap-4  flex-col">
           <input
             className="outline-1 p-2 rounded-lg"
             value={maxWidth}

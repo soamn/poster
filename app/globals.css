@@ -1,6 +1,20 @@
 @import "tailwindcss";
-
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/Inter-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "SUSE";
+  src: url("/fonts/suse/SUSE-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
 body {
+  font-family: "Inter";
   @apply bg-zinc-200;
 }
 .success {
@@ -20,6 +34,61 @@ body {
   overflow-y: scroll;
   scrollbar-width: thin;
 }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "SUSE";
+}
+
+.article blockquote {
+  @apply bg-white p-5 rounded-xl  relative pl-14;
+  position: relative;
+}
+.article blockquote::before {
+  content: '" ';
+}
+.article blockquote::after {
+  content: ' "';
+}
+.article blockquote span {
+  font-weight: 500;
+}
+
+.article ul li {
+  list-style-type: disc;
+  padding-left: 2rem;
+}
+.article ol li {
+  list-style-type: decimal;
+  padding-left: 1rem;
+}
+
+.article li span {
+  padding-left: 10px;
+}
+
+.article ol li::marker {
+  font-weight: 500;
+}
+.article img {
+  display: block;
+  width: 100%;
+  max-width: 400;
+  max-height: 500;
+  object-fit: cover;
+  margin: 0 auto;
+  border-radius: 1%;
+}
+.article a {
+  color: #c9b24d;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.2s ease-in-out;
+}
+
 h1 {
   @apply text-4xl;
 }

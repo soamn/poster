@@ -46,11 +46,17 @@ function Editor({ html, isUpdate }: { html: string; isUpdate: boolean }) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="relative mr-8 ">
+      <div
+        style={{ scrollbarWidth: "none" }}
+        className="z-40 min-w-full w-40 bottom-full h-12 bg-white rounded-xl overflow-x-scroll"
+      >
+        <Toolbar />
+      </div>
+      <div className="relative  article   ">
         <RichTextPlugin
           contentEditable={
             <ContentEditable
-              className=" bg-white  h-fit min-h-100 mb-10  p-2 py-10 rounded-4xl  outline-none 
+              className=" bg-white mt-12   h-150 overflow-scroll min-h-100 mb-10  p-2 py-4  rounded-2xl  outline-none 
             prose prose-sm max-w-none leading-relaxed selection:bg-blue-200 
             [&_u]:underline [&_strong]:font-bold [&_em]:italic [&_ul]:list-disc [&_ol]:list-decimal 
             [&_ul]:pl-6 [&_ol]:pl-6 
@@ -63,9 +69,7 @@ function Editor({ html, isUpdate }: { html: string; isUpdate: boolean }) {
             "
               aria-placeholder={"Enter some text..."}
               placeholder={
-                <div className="absolute  left-3 top-11">
-                  Enter some text...
-                </div>
+                <div className="absolute  left-3 top-5">Enter some text...</div>
               }
             />
           }
@@ -73,8 +77,6 @@ function Editor({ html, isUpdate }: { html: string; isUpdate: boolean }) {
         />
         {isUpdate ? <UpdatePlugin /> : <SavePlugin />}
       </div>
-
-      <Toolbar />
       <HistoryPlugin />
       <LinkPlugin />
       <ListPlugin />
