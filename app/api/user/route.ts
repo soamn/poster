@@ -126,9 +126,6 @@ export async function PUT(req: NextRequest) {
       },
       include: {
         posts: {
-          where: {
-            published: true,
-          },
           include: { category: true },
           take: 1,
         },
@@ -207,9 +204,6 @@ export async function DELETE(req: NextRequest) {
       where: { id },
       include: {
         posts: {
-          where: {
-            published: true,
-          },
           include: { category: true },
           take: 1,
         },

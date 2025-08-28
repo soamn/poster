@@ -20,8 +20,11 @@ export async function RevalidateSite(
           },
           body: JSON.stringify({ tag: tag }),
         });
+
         return;
-      } catch (err) {}
+      } catch (err) {
+        return;
+      }
     }
   } else {
     return;
