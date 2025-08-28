@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       include: { Category: true },
     });
     revalidatePath("/admin/categories");
-    RevalidateSite(subcategory.Category, "category");
+   await RevalidateSite(subcategory.Category, "category");
 
     return NextResponse.json({
       status: 200,
@@ -46,7 +46,7 @@ export async function PUT(req: NextRequest) {
       include: { Category: true },
     });
     revalidatePath("/admin/categories");
-    RevalidateSite(subcategory.Category, "category");
+  await  RevalidateSite(subcategory.Category, "category");
 
     return NextResponse.json({
       status: 200,
@@ -73,7 +73,7 @@ export async function DELETE(req: NextRequest) {
       include: { Category: true },
     });
     revalidatePath("/admin/categories");
-    RevalidateSite(subcategory.Category, "category");
+   await RevalidateSite(subcategory.Category, "category");
 
     return NextResponse.json({
       status: 200,

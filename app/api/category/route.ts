@@ -126,7 +126,7 @@ export async function PATCH(req: NextRequest) {
       },
     });
     revalidatePath("/admin/categories");
-    RevalidateSite(category, "category");
+    await RevalidateSite(category, "category");
 
     return NextResponse.json({
       status: 200,
@@ -159,7 +159,7 @@ export async function DELETE(req: NextRequest) {
       },
     });
     revalidatePath("/admin/categories");
-    RevalidateSite(category, "category");
+    await RevalidateSite(category, "category");
     return NextResponse.json({
       status: 200,
       message: `${category.name} deleted successfully`,

@@ -9,6 +9,7 @@ const AddCategory = () => {
   const [siteInput, setSiteInput] = useState("");
   const [sites, setSites] = useState<string[]>([]);
   const { showNotification } = useNotification();
+  const [adding, setAdding] = useState(false);
 
   const addSite = () => {
     if (!siteInput.trim()) {
@@ -38,6 +39,7 @@ const AddCategory = () => {
     }
 
     try {
+      setAdding(true);
       const res = await fetch("/api/category", {
         method: "POST",
         headers: {
@@ -57,6 +59,8 @@ const AddCategory = () => {
       }
     } catch (error) {
       showNotification("Failed to add category", "error");
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -133,10 +137,11 @@ const AddCategory = () => {
 
           {/* Submit */}
           <button
+            disabled={adding}
             onClick={addCategory}
-            className="bg-lime-600 text-white rounded px-4 py-2 mt-3 hover:bg-lime-700"
+            className="bg-lime-600 text-white rounded px-4 py-2 mt-3 hover:bg-lime-700 "
           >
-            Add Category
+            {adding ? <span>....</span> : <span>Add Category</span>}
           </button>
         </div>
       )}
