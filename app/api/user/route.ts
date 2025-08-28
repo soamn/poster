@@ -141,6 +141,7 @@ export async function PUT(req: NextRequest) {
     revalidatePath("/admin/users");
     if (updatedUser.posts.length > 0) {
       RevalidateSite(updatedUser.posts[0].category, "user");
+      RevalidateSite(updatedUser.posts[0].category, `user-${updatedUser.id}`);
     }
     return NextResponse.json({
       status: 201,
@@ -208,6 +209,7 @@ export async function DELETE(req: NextRequest) {
     revalidatePath("/admin/users");
     if (deletedUser.posts.length > 0) {
       RevalidateSite(deletedUser.posts[0].category, "user");
+      RevalidateSite(deletedUser.posts[0].category, `user-${deletedUser.id}`);
     }
     return NextResponse.json({
       status: 201,
