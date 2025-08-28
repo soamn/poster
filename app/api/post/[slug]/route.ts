@@ -133,6 +133,7 @@ export async function PUT(
     });
     revalidatePath("/admin/posts");
     RevalidateSite(updatedPost.category, `post-${updatedPost.slug}`);
+    RevalidateSite(updatedPost.category, `posts`);
 
     return NextResponse.json({
       status: 200,
@@ -205,6 +206,7 @@ export async function DELETE(
     revalidatePath("/");
     revalidatePath("/admin/posts");
     RevalidateSite(deletedPost.category, `post-${deletedPost.slug}`);
+    RevalidateSite(deletedPost.category, `posts`);
 
     return NextResponse.json({
       status: 200,
